@@ -75,17 +75,19 @@ resource "google_compute_backend_service" "default" {
   name          = "${var.name}-backend-${count.index}"
   port_name     = "${element(split(",", element(var.backend_params, count.index)), 1)}"
   protocol      = "HTTP"
-  timeout_sec   = "${element(split(",", element(var.backend_params, count.index)), 3)}"
+  timeout_sec   = "${element(split(",", element(var.backend_params, count.index)), 4)}"
   backend       = ["${var.backends["${count.index}"]}"]
   health_checks = ["${element(google_compute_http_health_check.default.*.self_link, count.index)}"]
 }
 
 resource "google_compute_http_health_check" "default" {
-  project      = "${var.project}"
-  count        = "${length(var.backend_params)}"
-  name         = "${var.name}-backend-${count.index}"
-  request_path = "${element(split(",", element(var.backend_params, count.index)), 0)}"
-  port         = "${element(split(",", element(var.backend_params, count.index)), 2)}"
+  project            = "${var.project}"
+  count              = "${length(var.backend_params)}"
+  name               = "${var.name}-backend-${count.index}"
+  request_path       = "${element(split(",", element(var.backend_params, count.index)), 0)}"
+  port               = "${element(split(",", element(var.backend_params, count.index)), 2)}"
+  timeout_sec        = "${element(split(",", element(var.backend_params, count.index)), 4)}"
+  check_interval_sec = "${element(split(",", element(var.backend_params, count.index)), 3)}"
 }
 
 resource "google_compute_firewall" "default-hc" {
