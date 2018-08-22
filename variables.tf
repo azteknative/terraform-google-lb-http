@@ -54,6 +54,11 @@ variable backend_params {
   type        = "list"
 }
 
+variable backend_protocol {
+  description = "The protocol with which to talk to the backend service"
+  default     = "HTTP"
+}
+
 variable create_url_map {
   description = "Set to `false` if url_map variable is provided."
   default     = true
@@ -98,4 +103,9 @@ variable ssl_certificates {
 variable security_policy {
   description = "The resource URL for the security policy to associate with the backend service"
   default     = ""
+}
+
+variable cdn {
+  description = "Set to `true` to enable cdn on backend."
+  default     = "false"
 }

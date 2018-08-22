@@ -63,7 +63,8 @@ resource "google_compute_ssl_certificate" "default" {
   name_prefix = "${var.name}-certificate-"
   private_key = "${var.private_key}"
   certificate = "${var.certificate}"
-  lifecycle   = {
+
+  lifecycle = {
     create_before_destroy = true
   }
 }
@@ -80,11 +81,12 @@ resource "google_compute_backend_service" "default" {
   count           = "${length(var.backend_params)}"
   name            = "${var.name}-backend-${count.index}"
   port_name       = "${element(split(",", element(var.backend_params, count.index)), 1)}"
-  protocol        = "HTTP"
+  protocol        = "${var.backend_protocol}"
   timeout_sec     = "${element(split(",", element(var.backend_params, count.index)), 4)}"
   backend         = ["${var.backends["${count.index}"]}"]
   health_checks   = ["${element(google_compute_http_health_check.default.*.self_link, count.index)}"]
   security_policy = "${var.security_policy}"
+  enable_cdn      = "${var.cdn}"
 }
 
 resource "google_compute_http_health_check" "default" {
