@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-variable region {
+variable "region" {
   default = "us-west1"
 }
 
-provider google {
+provider "google" {
   region = "${var.region}"
 }
 
 data "template_file" "group1-startup-script" {
-  template = "${file("${format("%s/../scripts/gceme.sh.tpl", path.module)}")}"
+  template = "${file("${format("%s/gceme.sh.tpl", path.module)}")}"
 
   vars {
     PROXY_PATH = ""
@@ -31,7 +31,8 @@ data "template_file" "group1-startup-script" {
 }
 
 module "mig1" {
-  source            = "github.com/GoogleCloudPlatform/terraform-google-managed-instance-group"
+  source            = "GoogleCloudPlatform/managed-instance-group/google"
+  version           = "1.1.13"
   region            = "us-west1"
   zone              = "us-west1-b"
   name              = "group1"
@@ -45,13 +46,13 @@ module "mig1" {
 }
 
 module "nat" {
-  source  = "github.com/GoogleCloudPlatform/terraform-google-nat-gateway"
+  source  = "GoogleCloudPlatform/nat-gateway/google"
+  version = "1.2.0"
   region  = "us-west1"
   network = "default"
 }
 
 module "gce-lb-http" {
-  // source      = "github.com/GoogleCloudPlatform/terraform-google-lb-http"
   source      = "../../"
   name        = "group-http-lb"
   target_tags = ["allow-group1"]

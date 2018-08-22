@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-data "template_file" "group1-west-startup-script" {
+data "template_file" "group1-startup-script" {
   template = "${file("${format("%s/gceme.sh.tpl", path.module)}")}"
 
   vars {
@@ -22,7 +22,7 @@ data "template_file" "group1-west-startup-script" {
   }
 }
 
-data "template_file" "group2-central-startup-script" {
+data "template_file" "group2-startup-script" {
   template = "${file("${format("%s/gceme.sh.tpl", path.module)}")}"
 
   vars {
@@ -30,7 +30,7 @@ data "template_file" "group2-central-startup-script" {
   }
 }
 
-data "template_file" "group3-east-startup-script" {
+data "template_file" "group3-startup-script" {
   template = "${file("${format("%s/gceme.sh.tpl", path.module)}")}"
 
   vars {
@@ -41,38 +41,44 @@ data "template_file" "group3-east-startup-script" {
 module "mig1" {
   source            = "GoogleCloudPlatform/managed-instance-group/google"
   version           = "1.1.13"
-  region            = "us-west1"
-  zone              = "us-west1-b"
-  name              = "group1-west"
+  region            = "${var.region1}"
+  zone              = "${var.zone1}"
+  name              = "${var.network_name}-group1"
   size              = 2
   target_tags       = ["allow-group1"]
   service_port      = 80
   service_port_name = "http"
-  startup_script    = "${data.template_file.group1-west-startup-script.rendered}"
+  startup_script    = "${data.template_file.group1-startup-script.rendered}"
+  network           = "${google_compute_network.default.name}"
+  subnetwork        = "${google_compute_subnetwork.region1.name}"
 }
 
 module "mig2" {
   source            = "GoogleCloudPlatform/managed-instance-group/google"
   version           = "1.1.13"
-  region            = "us-central1"
-  zone              = "us-central1-b"
-  name              = "group2-central"
+  region            = "${var.region2}"
+  zone              = "${var.zone2}"
+  name              = "${var.network_name}-group2"
   size              = 2
   target_tags       = ["allow-group2"]
   service_port      = 80
   service_port_name = "http"
-  startup_script    = "${data.template_file.group2-central-startup-script.rendered}"
+  startup_script    = "${data.template_file.group2-startup-script.rendered}"
+  network           = "${google_compute_network.default.name}"
+  subnetwork        = "${google_compute_subnetwork.region2.name}"
 }
 
 module "mig3" {
   source            = "GoogleCloudPlatform/managed-instance-group/google"
   version           = "1.1.13"
-  region            = "us-east1"
-  zone              = "us-east1-b"
-  name              = "group3-east"
+  region            = "${var.region3}"
+  zone              = "${var.zone3}"
+  name              = "${var.network_name}-group3"
   size              = 2
   target_tags       = ["allow-group3"]
   service_port      = 80
   service_port_name = "http"
-  startup_script    = "${data.template_file.group3-east-startup-script.rendered}"
+  startup_script    = "${data.template_file.group3-startup-script.rendered}"
+  network           = "${google_compute_network.default.name}"
+  subnetwork        = "${google_compute_subnetwork.region3.name}"
 }
