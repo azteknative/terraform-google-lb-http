@@ -82,7 +82,7 @@ resource "google_compute_backend_service" "default" {
   name            = "${var.name}-backend-${count.index}"
   port_name       = "${element(split(",", element(var.backend_params, count.index)), 1)}"
   protocol        = "${var.backend_protocol}"
-  timeout_sec     = "${element(split(",", element(var.backend_params, count.index)), 4)}"
+  timeout_sec     = "${element(split(",", element(var.backend_params, count.index)), 3)}"
   backend         = ["${var.backends["${count.index}"]}"]
   health_checks   = ["${element(google_compute_http_health_check.default.*.self_link, count.index)}"]
   security_policy = "${var.security_policy}"
@@ -95,8 +95,8 @@ resource "google_compute_http_health_check" "default" {
   name               = "${var.name}-backend-${count.index}"
   request_path       = "${element(split(",", element(var.backend_params, count.index)), 0)}"
   port               = "${element(split(",", element(var.backend_params, count.index)), 2)}"
-  timeout_sec        = "${element(split(",", element(var.backend_params, count.index)), 4)}"
-  check_interval_sec = "${element(split(",", element(var.backend_params, count.index)), 3)}"
+  timeout_sec        = "${element(split(",", element(var.backend_params, count.index)), 3)}"
+  check_interval_sec = "${length(split(",", element(var.backend_params, count.index))) < 5 ? 60 : element(split(",", element(var.backend_params, count.index)), 4)}"
 }
 
 resource "google_compute_firewall" "default-hc" {
