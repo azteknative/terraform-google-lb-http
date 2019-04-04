@@ -99,10 +99,10 @@ resource "google_compute_http_health_check" "default" {
   check_interval_sec = "${length(split(",", element(var.backend_params, count.index))) < 5 ? 60 : element(split(",", element(var.backend_params, count.index)), 4)}"
 }
 
+# Create firewall rule for each backend in each network specified, uses mod behavior of element().
 resource "google_compute_firewall" "default-hc" {
-  count         = "${length(var.firewall_networks)}"
-  project       = "${var.project}"
-  count         = "${length(var.backend_params)}"
+  count         = "${length(var.firewall_networks) * length(var.backend_params)}"
+  project       = "${element(var.firewall_projects, count.index) == "default" ? var.project : element(var.firewall_projects, count.index)}"
   name          = "${var.name}-hc-${count.index}"
   network       = "${element(var.firewall_networks, count.index)}"
   source_ranges = ["130.211.0.0/22", "35.191.0.0/16", "209.85.152.0/22", "209.85.204.0/22"]
@@ -110,6 +110,6 @@ resource "google_compute_firewall" "default-hc" {
 
   allow {
     protocol = "tcp"
-    ports    = ["${element(split(",", element(var.backend_params, count.index)), 2)}"]
+    ports    = ["${element(split(",", element(split("|", join("", list(join("|", var.backend_params), replace(format("%*s", length(var.backend_params), ""), " ", "|")))), count.index)), 2)}"]
   }
 }
